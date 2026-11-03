@@ -1,0 +1,33 @@
+# Umgebungs- & Geheimnis-Dateien (aus allen Ordnern ignorieren)
+.env*
+*.env
+
+# Python Cache & virtuelle Umgebungen
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+/.env
+build/
+dist/
+*.egg-info/
+
+# IDE & Editor-Einstellungen
+.vscode/
+.idea/
+
+# Betriebssystem-Dateien
+.DS_Store
+Thumbs.db
+
+# Daten- & Input-Ordner (Ordner bleibt durch .gitkeep erhalten)
+output/*
+!output/.gitkeep
+
+# Sensible oder spezifische Dateien
+Prompt.txt
+config.py
+*.csv
+*.xlsx
+*.env

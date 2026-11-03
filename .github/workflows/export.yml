@@ -1,0 +1,48 @@
+name: Update ChurchTools Export
+
+on:
+  schedule:
+    - cron: "17 2 * * *"
+
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes graphviz
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          dot -V
+
+      - name: Run ChurchTools export
+        env:
+          CHURCHTOOLS_LOGIN_TOKEN: ${{ secrets.CHURCHTOOLS_LOGIN_TOKEN }}
+          CHURCHTOOLS_BASE_URL: ${{ secrets.CHURCHTOOLS_BASE_URL }}
+        run: python main.py --runner-export
+
+      - name: Upload export to Cloudflare R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      
+        run: |
+          for file in Orgchart.pdf Orgchart_phone.pdf Orgchart_mail.pdf; do
+            aws s3 cp "output/${file}" \
+              "s3://churchtools-organigramm-export/${file}" \
+              --endpoint-url "https://${R2_ACCOUNT_ID}.eu.r2.cloudflarestorage.com"
+          done
